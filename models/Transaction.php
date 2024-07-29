@@ -1,0 +1,98 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+use yii\db\ActiveQuery;
+
+/**
+ * This is the model class for table "transactions".
+ *
+ * @property int $id
+ * @property int|null $date
+ * @property int|null $customer_id
+ * @property int|null $type
+ * @property float|null $amount
+ * @property int|null $payment_type
+ * @property int|null $status
+ * @property string|null $comment
+ * @property int|null $model_id
+ * @property string|null $model_class
+ * @property int|null $deleted_at
+ * @property int|null $created_at
+ * @property int|null $updated_at
+ *
+ * @property Customer $customer
+ */
+class Transaction extends \app\models\BaseModel
+{
+
+    const TYPE_INCOME = 1;
+    const TYPE_OUTCOME = 2;
+
+    const PAYMENT_TYPE_CASH = 1;
+    const PAYMENT_TYPE_CARD = 2;
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'transactions';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['type', 'amount'], 'required'],
+            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
+            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['amount'], 'number'],
+            [['comment'], 'string'],
+            [['model_class'], 'string', 'max' => 255],
+            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'id']],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'date' => 'Date',
+            'customer_id' => 'Customer ID',
+            'type' => 'Type',
+            'amount' => 'Amount',
+            'payment_type' => 'Payment Type',
+            'status' => 'Status',
+            'comment' => 'Comment',
+            'model_id' => 'Model ID',
+            'model_class' => 'Model Class',
+            'deleted_at' => 'Deleted At',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ];
+    }
+
+    /**
+     * Gets query for [[Customer]].
+     *
+     * @return ActiveQuery|\app\models\search\CustomerQuery
+     */
+    public function getCustomer(): ActiveQuery|search\CustomerQuery
+    {
+        return $this->hasOne(Customer::class, ['id' => 'customer_id']);
+    }
+
+    public function extraFields()
+    {
+        return [
+            'customer',
+        ];
+    }
+}
