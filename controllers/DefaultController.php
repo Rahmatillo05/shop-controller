@@ -24,7 +24,7 @@ class DefaultController extends ActiveController
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
             'class' => HttpBearerAuth::class,
-            'except' => ['index', 'view', 'login'],
+            'except' => ['login'],
         ];
         $behaviors['corsFilter'] = [
             'class' => \yii\filters\Cors::class,
