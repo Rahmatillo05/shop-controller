@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\DTOs\CustomerBalance;
+use app\models\search\ProductListQuery;
+use app\models\search\UserQuery;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -31,7 +33,7 @@ class Customer extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'customers';
     }
@@ -53,7 +55,7 @@ class Customer extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -88,9 +90,9 @@ class Customer extends \app\models\BaseModel
     /**
      * Gets query for [[ProductLists]].
      *
-     * @return ActiveQuery|\app\models\search\ProductListQuery
+     * @return ActiveQuery|ProductListQuery
      */
-    public function getProductLists()
+    public function getProductLists(): ActiveQuery|search\ProductListQuery
     {
         return $this->hasMany(ProductList::class, ['customer_id' => 'id']);
     }
@@ -98,9 +100,9 @@ class Customer extends \app\models\BaseModel
     /**
      * Gets query for [[User]].
      *
-     * @return ActiveQuery|\app\models\search\UserQuery
+     * @return ActiveQuery
      */
-    public function getUser()
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }

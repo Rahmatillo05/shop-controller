@@ -14,7 +14,7 @@ class ProductHistoryQuery extends ProductHistory
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'product_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],

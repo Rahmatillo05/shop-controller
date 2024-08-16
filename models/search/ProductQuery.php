@@ -14,7 +14,7 @@ class ProductQuery extends Product
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'category_id', 'status', 'deleted_at', 'created_at', 'updated_at'], 'integer'],

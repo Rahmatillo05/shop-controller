@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\search\CustomerQuery;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -36,7 +37,7 @@ class Transaction extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'transactions';
     }
@@ -44,7 +45,7 @@ class Transaction extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['type', 'amount'], 'required'],
@@ -60,7 +61,7 @@ class Transaction extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -82,14 +83,14 @@ class Transaction extends \app\models\BaseModel
     /**
      * Gets query for [[Customer]].
      *
-     * @return ActiveQuery|\app\models\search\CustomerQuery
+     * @return ActiveQuery|CustomerQuery
      */
     public function getCustomer(): ActiveQuery|search\CustomerQuery
     {
         return $this->hasOne(Customer::class, ['id' => 'customer_id']);
     }
 
-    public function extraFields()
+    public function extraFields(): array
     {
         return [
             'customer',

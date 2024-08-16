@@ -4,12 +4,12 @@ namespace app\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Transaction;
+use app\models\Setting;
 
 /**
- * TransactionQuery represents the model behind the search form of `app\models\Transaction`.
+ * SettingQuery represents the model behind the search form of `app\models\Setting`.
  */
-class TransactionQuery extends Transaction
+class SettingQuery extends Setting
 {
     /**
      * {@inheritdoc}
@@ -17,9 +17,8 @@ class TransactionQuery extends Transaction
     public function rules(): array
     {
         return [
-            [['id', 'date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
-            [['amount'], 'number'],
-            [['comment', 'model_class'], 'safe'],
+            [['id', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['title', 'value', 'key'], 'safe'],
         ];
     }
 
@@ -41,7 +40,7 @@ class TransactionQuery extends Transaction
      */
     public function search($params)
     {
-        $query = Transaction::find();
+        $query = Setting::find();
 
         // add conditions that should always apply here
 
@@ -60,20 +59,15 @@ class TransactionQuery extends Transaction
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'date' => $this->date,
-            'customer_id' => $this->customer_id,
             'type' => $this->type,
-            'amount' => $this->amount,
-            'payment_type' => $this->payment_type,
-            'status' => $this->status,
-            'model_id' => $this->model_id,
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'comment', $this->comment])
-            ->andFilterWhere(['ilike', 'model_class', $this->model_class]);
+        $query->andFilterWhere(['ilike', 'title', $this->title])
+            ->andFilterWhere(['ilike', 'value', $this->value])
+            ->andFilterWhere(['ilike', 'key', $this->key]);
 
         return $dataProvider;
     }

@@ -18,7 +18,7 @@ class UserController extends DefaultController
     public function actions(): array
     {
         $actions = parent::actions();
-        unset($actions['create'], $actions['update']);
+        unset($actions['create'], $actions['update'], $actions['delete']);
 
         return $actions;
     }
@@ -30,7 +30,7 @@ class UserController extends DefaultController
             $user = Yii::$app->cache->get($user_id);
             if (!$user) {
                 $user = User::findOne($user_id);
-                Yii::$app->cache->set($user->id, $user, 3600 * 12);
+                Yii::$app->cache->set("User:$user->id", $user, 3600 * 12);
             }
             return ResponseHelper::okResponse($user);
         }
@@ -96,5 +96,17 @@ class UserController extends DefaultController
         } else {
             return ResponseHelper::errorResponse($user->errors, code: 422);
         }
+    }
+
+    public function actionDelete($id): array
+    {
+        $user = User::findOne($id);
+        if ($user) {
+            return ResponseHelper::errorResponse(message: "Foydalanuvchi topilmadi", code: 404);
+        }
+        $user->updateAttributes([
+            'username' => $user->username . ':' . time()
+        ]);
+        return parent::actionDelete($id);
     }
 }

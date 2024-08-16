@@ -14,7 +14,7 @@ class CustomerQuery extends Customer
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'status', 'user_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],

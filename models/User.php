@@ -38,7 +38,7 @@ class User extends BaseModel implements IdentityInterface
     {
         parent::afterSave($insert, $changedAttributes);
 
-        Yii::$app->cache->delete($this->id);
+        Yii::$app->cache->delete("User:$this->id");
     }
 
     /**
@@ -51,7 +51,7 @@ class User extends BaseModel implements IdentityInterface
             [['status', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['status', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['full_name', 'username', 'password', 'phone_number', 'address', 'auth_key', 'user_role', 'access_token'], 'string', 'max' => 255],
-            [['username'], 'unique', 'targetAttribute' => ['username']],
+            [['username'], 'unique'],
         ];
     }
 

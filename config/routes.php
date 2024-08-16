@@ -35,5 +35,11 @@ return [
         'controller' => 'customer',
         'extraPatterns' => [
         ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
+        'controller' => 'setting',
+        'extraPatterns' => [
+        ],
     ]
 ];

@@ -50,7 +50,7 @@ class DefaultController extends ActiveController
     {
         $model = $this->modelClass::findOne($id);
         if (!$model) {
-            return ResponseHelper::errorResponse('User not found', 404);
+            return ResponseHelper::errorResponse(message: 'Object not found', code: 404);
         }
         if (!$model->delete()){
             ResponseHelper::errorResponse($model->errors, code: 422);
