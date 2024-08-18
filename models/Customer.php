@@ -28,7 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property CustomerBalance $balance
  *
  */
-class Customer extends \app\models\BaseModel
+class Customer extends BaseModel
 {
     /**
      * {@inheritdoc}

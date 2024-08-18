@@ -6,6 +6,7 @@ use app\helpers\ResponseHelper;
 use app\models\User;
 use yii\data\ActiveDataFilter;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\StaleObjectException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
@@ -31,6 +32,7 @@ class DefaultController extends ActiveController
         ];
         return $behaviors;
     }
+
     public function actions(): array
     {
         $actions = parent::actions();
@@ -52,9 +54,24 @@ class DefaultController extends ActiveController
         if (!$model) {
             return ResponseHelper::errorResponse(message: 'Object not found', code: 404);
         }
-        if (!$model->delete()){
+        if (!$model->delete()) {
             ResponseHelper::errorResponse($model->errors, code: 422);
         }
         return ResponseHelper::noContentResponse();
+    }
+
+    public function search(ActiveQuery $query, $columns = ['full_name'], $table = null): void
+    {
+        $search = $this->request->getQueryParam('search');
+        if ($search) {
+            foreach ($columns as $i => $column) {
+                $column = empty($table) ? $column : $table . '.' . $column;
+                if ($i == 0) {
+                    $query->andWhere(['LIKE', $column, "$search"]);
+                } else {
+                    $query->orWhere(['LIKE', $column, "$search"]);
+                }
+            }
+        }
     }
 }

@@ -101,11 +101,12 @@ class UserController extends DefaultController
     public function actionDelete($id): array
     {
         $user = User::findOne($id);
-        if ($user) {
+        if ((!$user instanceof User)) {
             return ResponseHelper::errorResponse(message: "Foydalanuvchi topilmadi", code: 404);
         }
         $user->updateAttributes([
-            'username' => $user->username . ':' . time()
+            'username' => $user->username . ':' . time(),
+            'access_token' => null
         ]);
         return parent::actionDelete($id);
     }
