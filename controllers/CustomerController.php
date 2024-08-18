@@ -12,4 +12,5 @@ class CustomerController extends DefaultController
 {
     public $modelClass = Customer::class;
     public $searchModelClass = CustomerQuery::class;
+
 }
