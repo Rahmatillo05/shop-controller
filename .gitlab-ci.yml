@@ -21,7 +21,7 @@ prod:
     "SSH_DIRECTORY_LOCAL_PROD": "./"
     "SSH_DIRECTORY_REMOTE_PROD": "/home/vodiyyul/api.vodiy-yulduzlari.uz/"
   script:
-    - sshpass -p $SSH_PASS_PROD rsync -riz --links -e "ssh -o StrictHostKeyChecking=no -p $SSH_PORT_PROD" $SSH_DIRECTORY_LOCAL_PROD $SSH_USER_PROD@$SSH_HOST_PROD:$SSH_DIRECTORY_REMOTE_PROD
+    - scp -P $SSH_PASS_PROD -r $SSH_DIRECTORY_LOCAL_PROD $SSH_USER_PROD@$SSH_HOST_PROD:$SSH_DIRECTORY_REMOTE_PROD
     - sshpass -p $SSH_PASS_PROD ssh $SSH_USER_PROD@$SSH_HOST_PROD "cd $SSH_DIRECTORY_REMOTE_PROD && php yii migrate --interactive=0"
     - sh .ci-notify.sh ✅
   only:
