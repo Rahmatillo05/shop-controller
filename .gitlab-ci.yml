@@ -1,0 +1,33 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+  - apk add rsync sshpass curl
+stages:
+  - deploy
+  - notify
+
+prod:
+  stage: deploy
+  environment:
+    name: Production
+  variables:
+    "SSH_PASS_PROD": "9sYVe[8orQ9E[1"
+    "SSH_HOST_PROD": "server2.ahost.cloud"
+    "SSH_USER_PROD": "vodiyyul"
+    "SSH_PORT_PROD": "30151"
+    "SSH_DIRECTORY_LOCAL_PROD": "./"
+    "SSH_DIRECTORY_REMOTE_PROD": "/home/vodiyyul/api.vodiy-yulduzlari.uz/"
+  script:
+    - sshpass -p $SSH_PASS_PROD rsync -riz --links -e "ssh -o StrictHostKeyChecking=no -p $SSH_PORT_PROD" $SSH_DIRECTORY_LOCAL_PROD $SSH_USER_PROD@$SSH_HOST_PROD:$SSH_DIRECTORY_REMOTE_PROD
+    - sshpass -p $SSH_PASS_PROD ssh $SSH_USER_PROD@$SSH_HOST_PROD "cd $SSH_DIRECTORY_REMOTE_PROD && php yii migrate --interactive=0"
+    - sh .ci-notify.sh ✅
+  only:
+    - main
+notify_error:
+  stage: notify
+  script:
+    - sh .ci-error-notify.sh ❌
+  when: on_failure #deploy fail
