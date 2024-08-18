@@ -4,7 +4,7 @@ services:
   - docker:dind
 
 before_script:
-  - apk add rsync sshpass curl
+  - apk add --no-cache python3 py-pip git rsync sshpass curl
 stages:
   - deploy
   - notify
