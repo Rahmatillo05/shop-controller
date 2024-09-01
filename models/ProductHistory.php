@@ -10,6 +10,7 @@ use yii\db\ActiveQuery;
  *
  * @property int $id
  * @property int|null $product_id
+ * @property int|null $order_id
  * @property float|null $price
  * @property float|null $sale_price
  * @property float|null $amount
@@ -20,6 +21,7 @@ use yii\db\ActiveQuery;
  * @property int|null $updated_at
  *
  * @property Product $product
+ * @property Order $order
  * @property ProductList $productList
  */
 class ProductHistory extends \app\models\BaseModel
@@ -45,11 +47,12 @@ class ProductHistory extends \app\models\BaseModel
     {
         return [
             [['product_id', 'amount', 'price'], 'required'],
-            [['product_id', 'product_list_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['product_id', 'product_list_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['product_id', 'product_list_id', 'order_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
+            [['product_id', 'product_list_id', 'order_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['price', 'sale_price', 'amount'], 'number'],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['product_id' => 'id']],
             [['product_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductList::class, 'targetAttribute' => ['product_list_id' => 'id']],
+            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
         ];
     }
 
@@ -87,11 +90,17 @@ class ProductHistory extends \app\models\BaseModel
         return $this->hasOne(ProductList::class, ['id' => 'product_list_id']);
     }
 
+    public function getOrder(): ActiveQuery
+    {
+        return $this->hasOne(Order::class, ['id' => 'order_id']);
+    }
+
     public function extraFields(): array
     {
         return [
             'product',
             'productList',
+            'order'
         ];
     }
 }

@@ -26,12 +26,27 @@ class User extends BaseModel implements IdentityInterface
 {
     const STATUS_INACTIVE = 1;
     const STATUS_ACTIVE = 10;
+    const ROLE_SELLER = 'seller';
+    const ROLE_ADMIN = 'admin';
+
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return 'users';
+    }
+
+    public static function current(): User
+    {
+        $user_id = Yii::$app->user->id;
+        $user = Yii::$app->cache->get("User:$user_id");
+        if (!$user) {
+            $user = User::findOne($user_id);
+            Yii::$app->cache->set("User:$user->id", $user, 3600 * 12);
+            return $user;
+        }
+        return $user;
     }
 
     public function afterSave($insert, $changedAttributes): void

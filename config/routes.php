@@ -38,6 +38,12 @@ return [
     ],
     [
         'class' => 'yii\rest\UrlRule',
+        'controller' => 'order',
+        'extraPatterns' => [
+        ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
         'controller' => 'setting',
         'extraPatterns' => [
         ],

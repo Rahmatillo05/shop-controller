@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\search\CategoryQuery;
 use yii\db\ActiveQuery;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -115,7 +116,24 @@ class Product extends \app\models\BaseModel
             ->andWhere(['type' => ProductHistory::TYPE_INCOME])->sum('amount');
         $outgoing = $this->getProductHistory()
             ->andWhere(['type' => ProductHistory::TYPE_OUTCOME])->sum('amount');
-
         return round($income - $outgoing, 2);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addAmount(float $amount): bool
+    {
+        $history  = new ProductHistory();
+        $history->type = ProductHistory::TYPE_INCOME;
+        $history->product_id = $this->id;
+        $history->amount = $amount;
+        $history->price = $this->price;
+        $history->sale_price = $this->sale_price;
+        $history->status = ProductHistory::STATUS_ACTIVE;
+        if ($history->save()) {
+            return true;
+        }
+        throw new \DomainException("Mahsulot qoldig'í saqlanmadi");
     }
 }

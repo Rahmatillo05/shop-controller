@@ -5,7 +5,9 @@ namespace app\models;
 use app\models\search\OrderGoodQuery;
 use app\models\search\UserQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "orders".
@@ -27,12 +29,25 @@ use yii\db\ActiveQuery;
  */
 class Order extends BaseModel
 {
+    const STATUS_INACTIVE = 2;
+    const STATUS_ACTIVE = 1;
+
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return 'orders';
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        return ArrayHelper::merge($behaviors, [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'user_id',
+            'updatedByAttribute' => false
+        ]);
     }
 
     /**
@@ -69,6 +84,15 @@ class Order extends BaseModel
             'updated_at' => 'Updated At',
         ];
     }
+public static function find(): ActiveQuery
+{
+    $query = parent::find();
+    $user = User::current();
+    if ($user->user_role === User::ROLE_SELLER){
+        $query->andWhere(['orders.user_id' => $user->id]);
+    }
+    return $query;
+}
 
     /**
      * Gets query for [[Customer]].
@@ -100,7 +124,7 @@ class Order extends BaseModel
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
-    public function extraFields()
+    public function extraFields(): array
     {
         return [
             'user',

@@ -11,5 +11,6 @@ use app\models\search\OrderGoodQuery;
 class OrderGoodController extends DefaultController
 {
     public $modelClass = OrderGood::class;
+
     public $searchModelClass = OrderGoodQuery::class;
 }

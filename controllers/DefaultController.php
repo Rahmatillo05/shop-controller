@@ -64,14 +64,27 @@ class DefaultController extends ActiveController
     {
         $search = $this->request->getQueryParam('search');
         if ($search) {
-            foreach ($columns as $i => $column) {
-                $column = empty($table) ? $column : $table . '.' . $column;
-                if ($i == 0) {
-                    $query->andWhere(['LIKE', $column, "$search"]);
-                } else {
-                    $query->orWhere(['LIKE', $column, "$search"]);
+            if (is_numeric($search)) {
+                $column = empty($table) ? 'id' : $table . '.id';
+                $query->andWhere([$column => $search]);
+            } else {
+                foreach ($columns as $i => $column) {
+                    $column = empty($table) ? $column : $table . '.' . $column;
+                    if ($i == 0) {
+                        $query->andWhere(['LIKE', $column, "$search"]);
+                    } else {
+                        $query->orWhere(['LIKE', $column, "$search"]);
+                    }
                 }
             }
+        }
+    }
+
+    public function filter(ActiveQuery $query): void
+    {
+        $filter = $this->request->getQueryParam('filter');
+        if ($filter) {
+            $query->andWhere($filter);
         }
     }
 }

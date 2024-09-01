@@ -27,7 +27,6 @@ class CustomerController extends DefaultController
     {
         $query = $this->modelClass::find();
         $this->search($query);
-//        $query->with('transactions');
         return new ActiveDataProvider([
             'query' => $query
         ]);

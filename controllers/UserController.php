@@ -27,7 +27,7 @@ class UserController extends DefaultController
     {
         if (!Yii::$app->user->isGuest) {
             $user_id = Yii::$app->user->id;
-            $user = Yii::$app->cache->get($user_id);
+            $user = Yii::$app->cache->get("User:$user_id");
             if (!$user) {
                 $user = User::findOne($user_id);
                 Yii::$app->cache->set("User:$user->id", $user, 3600 * 12);
