@@ -22,6 +22,8 @@ use yii\db\ActiveQuery;
  * @property int|null $deleted_at
  * @property int|null $created_at
  * @property int|null $updated_at
+ * @property int|null $transaction_date
+ * @property int|null $relation_id
  *
  * @property Customer $customer
  */
@@ -33,6 +35,9 @@ class Transaction extends \app\models\BaseModel
 
     const PAYMENT_TYPE_CASH = 1;
     const PAYMENT_TYPE_CARD = 2;
+    const PAYMENT_TYPE_MIX = 3;
+    const PAYMENT_OUTGO = 4;
+    const STATUS_ACTIVE = 1;
 
     /**
      * {@inheritdoc}
@@ -49,12 +54,13 @@ class Transaction extends \app\models\BaseModel
     {
         return [
             [['type', 'amount'], 'required'],
-            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['date', 'customer_id', 'relation_id', 'transaction_date', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
+            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at', 'relation_id', 'transaction_date'], 'integer'],
             [['amount'], 'number'],
             [['comment'], 'string'],
             [['model_class'], 'string', 'max' => 255],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'id']],
+            [['relation_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['relation_id' => 'id']],
         ];
     }
 
@@ -90,10 +96,22 @@ class Transaction extends \app\models\BaseModel
         return $this->hasOne(Customer::class, ['id' => 'customer_id']);
     }
 
+    public function getRelations(): ActiveQuery
+    {
+        return $this->hasMany(self::class, ['relation_id' => 'id']);
+    }
+
+    public function getParent(): ActiveQuery
+    {
+        return $this->hasOne(self::class, ['id' => 'relation_id']);
+    }
+
     public function extraFields(): array
     {
         return [
             'customer',
+            'parent',
+            'relations'
         ];
     }
 }

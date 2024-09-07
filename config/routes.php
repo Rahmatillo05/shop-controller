@@ -28,6 +28,24 @@ return [
         'extraPatterns' => [
             'GET find-by-barcode/<barcode:>' => 'find-by-barcode',
             'OPTIONS find-by-barcode/<barcode:>' => 'options',
+            'POST add-amount/<id:>' => 'add-amount',
+            'OPTIONS add-amount/<id:>' => 'options',
+        ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
+        'controller' => 'product-history',
+        'extraPatterns' => [
+            ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
+        'controller' => 'product-list',
+        'extraPatterns' => [
+            'POST add-product/<id:>' => 'add-product',
+            'OPTIONS add-product/<id:>' => 'options',
+            'POST accept/<id:>' => 'accept',
+            'OPTIONS accept/<id:>' => 'options',
         ],
     ],
     [

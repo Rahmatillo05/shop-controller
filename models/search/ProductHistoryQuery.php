@@ -17,7 +17,7 @@ class ProductHistoryQuery extends ProductHistory
     public function rules(): array
     {
         return [
-            [['id', 'product_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'product_id', 'product_list_id', 'status', 'type', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['price', 'sale_price', 'amount'], 'number'],
         ];
     }

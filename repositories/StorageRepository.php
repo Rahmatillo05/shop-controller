@@ -3,13 +3,28 @@
 namespace app\repositories;
 
 use app\models\OrderGood;
+use app\models\Product;
 use app\models\ProductHistory;
+use app\models\ProductList;
 use DomainException;
+use yii\db\Exception;
+use yii\web\NotFoundHttpException;
 
 class StorageRepository
 {
     /**
-     * @throws \yii\db\Exception
+     * @throws NotFoundHttpException
+     */
+    public function findProductById(int $id): Product
+    {
+        $product = Product::findOne($id);
+        if (!$product) {
+            throw new NotFoundHttpException("Mahsulot topilmadi!");
+        }
+        return $product;
+    }
+    /**
+     * @throws Exception
      */
     public function createOutgoRecord(OrderGood $orderGood): ProductHistory
     {
@@ -25,5 +40,29 @@ class StorageRepository
             return $history;
         }
         throw new DomainException("Record not saved");
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function findProductListById($id): ProductList
+    {
+        $productList = ProductList::findOne($id);
+        if (!$productList) {
+            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!");
+        }
+        return $productList;
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function findProductAmountById($id): ProductHistory
+    {
+        $history = ProductHistory::findOne($id);
+        if (!$history) {
+            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!");
+        }
+        return $history;
     }
 }

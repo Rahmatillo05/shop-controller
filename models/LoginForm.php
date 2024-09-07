@@ -57,9 +57,11 @@ class LoginForm extends Model
     public function login(): bool|User
     {
         if ($this->validate()) {
-            $token = Yii::$app->security->generateRandomString();
             $user = $this->getUser();
-            $user->access_token = $token;
+            if(is_null($user->access_token)){
+                $token = Yii::$app->security->generateRandomString();
+                $user->access_token = $token;
+            }
             if (!$user->save()){
                 Yii::$app->response->statusCode = 422;
                 return false;

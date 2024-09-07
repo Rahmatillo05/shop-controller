@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\search\CustomerQuery;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -18,9 +19,16 @@ use yii\db\ActiveQuery;
  * @property int|null $updated_at
  *
  * @property Customer $customer
+ * @property ProductHistory[] $products
+ * @property float $totalSum
  */
 class ProductList extends \app\models\BaseModel
 {
+    const STATUS_ACTIVE = 1;
+    const STATUS_INACTIVE = 0;
+    const STATUS_waiting = 2;
+
+
     /**
      * {@inheritdoc}
      */
@@ -45,7 +53,7 @@ class ProductList extends \app\models\BaseModel
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -62,17 +70,28 @@ class ProductList extends \app\models\BaseModel
     /**
      * Gets query for [[Customer]].
      *
-     * @return ActiveQuery|\app\models\search\CustomerQuery
+     * @return ActiveQuery|CustomerQuery
      */
     public function getCustomer(): ActiveQuery|search\CustomerQuery
     {
         return $this->hasOne(Customer::class, ['id' => 'customer_id']);
     }
 
-    public function extraFields()
+    public function getProducts(): ActiveQuery
+    {
+        return $this->hasMany(ProductHistory::class, ['product_list_id' => 'id']);
+    }
+
+    public function getTotalSum(): float
+    {
+        return (float)$this->getProducts()->sum("(price*amount)");
+    }
+
+    public function extraFields(): array
     {
         return [
-            'customer'
+            'customer',
+            'totalSum'
         ];
     }
 

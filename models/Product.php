@@ -122,15 +122,16 @@ class Product extends \app\models\BaseModel
     /**
      * @throws Exception
      */
-    public function addAmount(float $amount): bool
+    public function addAmount(float $amount, $productListId = null, $status = ProductHistory::STATUS_ACTIVE): bool
     {
-        $history  = new ProductHistory();
+        $history = new ProductHistory();
         $history->type = ProductHistory::TYPE_INCOME;
         $history->product_id = $this->id;
         $history->amount = $amount;
         $history->price = $this->price;
         $history->sale_price = $this->sale_price;
-        $history->status = ProductHistory::STATUS_ACTIVE;
+        $history->status = $status;
+        $history->product_list_id = $productListId;
         if ($history->save()) {
             return true;
         }

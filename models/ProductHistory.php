@@ -10,6 +10,7 @@ use yii\db\ActiveQuery;
  *
  * @property int $id
  * @property int|null $product_id
+ * @property int|null $product_list_id
  * @property int|null $order_id
  * @property float|null $price
  * @property float|null $sale_price
