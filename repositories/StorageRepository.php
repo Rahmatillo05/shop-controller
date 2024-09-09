@@ -19,7 +19,7 @@ class StorageRepository
     {
         $product = Product::findOne($id);
         if (!$product) {
-            throw new NotFoundHttpException("Mahsulot topilmadi!");
+            throw new NotFoundHttpException("Mahsulot topilmadi!", 404);
         }
         return $product;
     }
@@ -39,7 +39,7 @@ class StorageRepository
         if ($history->save()) {
             return $history;
         }
-        throw new DomainException("Record not saved");
+        throw new DomainException("Record not saved", 500);
     }
 
     /**
@@ -49,7 +49,7 @@ class StorageRepository
     {
         $productList = ProductList::findOne($id);
         if (!$productList) {
-            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!");
+            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!", 404);
         }
         return $productList;
     }
@@ -61,7 +61,7 @@ class StorageRepository
     {
         $history = ProductHistory::findOne($id);
         if (!$history) {
-            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!");
+            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!", 404);
         }
         return $history;
     }

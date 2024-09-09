@@ -24,6 +24,7 @@ use yii\db\ActiveQuery;
  * @property int|null $updated_at
  * @property int|null $transaction_date
  * @property int|null $relation_id
+ * @property int|null $is_cash
  *
  * @property Customer $customer
  */
@@ -38,6 +39,7 @@ class Transaction extends \app\models\BaseModel
     const PAYMENT_TYPE_MIX = 3;
     const PAYMENT_OUTGO = 4;
     const STATUS_ACTIVE = 1;
+    const STATUS_INACTIVE = 0;
 
     /**
      * {@inheritdoc}
@@ -54,8 +56,8 @@ class Transaction extends \app\models\BaseModel
     {
         return [
             [['type', 'amount'], 'required'],
-            [['date', 'customer_id', 'relation_id', 'transaction_date', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at', 'relation_id', 'transaction_date'], 'integer'],
+            [['date', 'customer_id', 'relation_id', 'transaction_date', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at', 'is_cash'], 'default', 'value' => null],
+            [['date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at', 'relation_id', 'transaction_date', 'is_cash'], 'integer'],
             [['amount'], 'number'],
             [['comment'], 'string'],
             [['model_class'], 'string', 'max' => 255],

@@ -7,6 +7,7 @@ use app\models\search\ProductListQuery;
 use app\models\search\UserQuery;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -70,7 +71,7 @@ class Customer extends BaseModel
         ];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return ArrayHelper::merge(parent::fields(), [
             'balance' => function ($model) {
@@ -109,14 +110,29 @@ class Customer extends BaseModel
 
     public function getTransactions(): ActiveQuery
     {
-        return $this->hasMany(Transaction::class, ['customer_id' => 'id']);
+        return $this->hasMany(Transaction::class, ['transactions.customer_id' => 'id']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getBalance(): CustomerBalance
     {
-        $credit = (float)$this->getTransactions()->andWhere(['type' => Transaction::TYPE_INCOME])->sum('amount');
-        $debit = (float)$this->getTransactions()->where(['type' => Transaction::TYPE_OUTCOME])->sum('amount');
-        return new CustomerBalance($credit, $debit);
+        $statusInActive = Transaction::STATUS_INACTIVE;
+        $sql = <<<SQL
+select
+    case when type=1 then sum(amount) end as credit,
+    case when type=2 then sum(amount) end as debit
+    from transactions
+where customer_id = {$this->id}
+  and status <> {$statusInActive}
+group by type
+SQL;
+        $balance = Yii::$app->db->createCommand($sql)->queryOne();
+        if ($balance){
+            return new CustomerBalance((float)$balance['credit'], (float)$balance['debit']);
+        }
+        return new CustomerBalance(0, 0);
     }
 
 }

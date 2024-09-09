@@ -2,10 +2,12 @@
 
 namespace app\repositories;
 
+use app\DTOs\GetTransactionDTO;
 use app\DTOs\TransactionDTO;
 use app\models\ProductList;
 use app\models\Transaction;
 use yii\db\Exception;
+use yii\web\NotFoundHttpException;
 
 class AccountingRepository
 {
@@ -17,12 +19,14 @@ class AccountingRepository
         $transactionDto = new TransactionDTO();
         $transactionDto->customer_id = $list->customer_id;
         $transactionDto->amount = $list->totalSum;
-        $transactionDto->type = Transaction::TYPE_OUTCOME;
+        $transactionDto->type = Transaction::TYPE_INCOME;
         $transactionDto->payment_type = Transaction::PAYMENT_OUTGO;
         $transactionDto->date = $list->date;
         $transactionDto->transaction_date = time();
         $transactionDto->model_id = $list->id;
         $transactionDto->model_class = ProductList::class;
+        $transactionDto->comment = $list->comment;
+        $transactionDto->is_cash = null;
         return $this->createTransaction($transactionDto);
     }
 
@@ -47,6 +51,7 @@ class AccountingRepository
         $transaction->comment = $transactionDTO->comment;
         $transaction->status = Transaction::STATUS_ACTIVE;
         $transaction->relation_id = $transactionDTO->relation_id;
+        $transaction->is_cash = $transactionDTO->is_cash;
         if (!$transaction->save()) {
             throw new \DomainException(json_encode($transaction->errors), 422);
         }
@@ -67,6 +72,62 @@ class AccountingRepository
         $transaction = Transaction::findOne($id);
         if (!($transaction instanceof Transaction)) {
             $transaction = new Transaction();
+        }
+        return $transaction;
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     * @throws Exception
+     */
+    public function inactivatedTransaction(GetTransactionDTO $getTransactionDTO): ?Transaction
+    {
+        $transaction = $this->findTransaction($getTransactionDTO);
+        $transaction->status = Transaction::STATUS_INACTIVE;
+        if (!$transaction->save()) {
+            throw new \DomainException(json_encode($transaction->errors), 422);
+        }
+        return $transaction;
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function findTransaction(GetTransactionDTO $transactionDTO): ?Transaction
+    {
+        if (!is_null($transactionDTO->id)) {
+            $transaction = Transaction::findOne($transactionDTO->id);
+        } elseif (!is_null($transactionDTO->model) && !is_null($transactionDTO->model_id)) {
+            $transaction = Transaction::findOne(['model_id' => $transactionDTO->model_id, 'model_class' => $transactionDTO->model]);
+        } else {
+            $transaction = null;
+        }
+        if (!($transaction instanceof Transaction)) {
+            throw new NotFoundHttpException("Transzaksizya topilmadi!", 404);
+        }
+        return $transaction;
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     * @throws Exception
+     */
+    public function updateOrCreateTransaction(GetTransactionDTO $findTransactionDto, array $updateTransactionDTO, $is_create = false): ?Transaction
+    {
+        $transaction = $this->findTransaction($findTransactionDto);
+        if ($is_create) {
+            $_transaction = new Transaction();
+            $_transaction->setAttributes($transaction->attributes);
+            foreach ($updateTransactionDTO as $field => $value) {
+                $_transaction->{$field} = $value;
+            }
+        } else {
+            foreach ($updateTransactionDTO as $field => $value) {
+                $transaction->{$field} = $value;
+            }
+        }
+        if (!$transaction->save()) {
+            throw new \DomainException(json_encode($transaction->errors), 422);
         }
         return $transaction;
     }

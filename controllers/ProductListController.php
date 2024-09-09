@@ -3,12 +3,15 @@
 namespace app\controllers;
 
 
+use app\DTOs\GetTransactionDTO;
 use app\helpers\ResponseHelper;
 use app\models\ProductHistory;
 use app\models\ProductList;
 use app\models\search\ProductListQuery;
+use app\models\Transaction;
 use app\repositories\AccountingRepository;
 use app\repositories\StorageRepository;
+use DomainException;
 use Yii;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
@@ -61,61 +64,80 @@ class ProductListController extends DefaultController
         return ResponseHelper::errorResponse($model->errors, code: $model->getErrors());
     }
 
-    public function actionAddProduct($id): array
-    {
-        $transaction = Yii::$app->db->beginTransaction();
-        $data = Yii::$app->request->post();
-        try {
-            $storageRepository = new StorageRepository();
-            $model = $storageRepository->findProductListById($id);
-            $product = $storageRepository->findProductById($data['product_id']);
-            $amount = $data['amount'] ?? null;
-            unset($data['amount'], $data['product_id']);
-            $product->load($data, '');
-            $product->save();
-            if ($amount) {
-                $product->addAmount($amount, $model->id, ProductHistory::STATUS_WAIT);
-            }
-            $transaction->commit();
-            return ResponseHelper::okResponse($product);
-        } catch (Exception|NotFoundHttpException $e) {
-            $transaction->rollBack();
-            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
-        }
-    }
-
-    public function actionDeleteProduct($id): array
-    {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            $storageRepository = new StorageRepository();
-            $historyAmount = $storageRepository->findProductAmountById($id);
-            $historyAmount->delete();
-            $transaction->commit();
-            return ResponseHelper::okResponse();
-        } catch (NotFoundHttpException|Exception|\Throwable $e) {
-            $transaction->rollBack();
-            return ResponseHelper::errorResponse(message:$e->getMessage(), code: $e->getCode());
-        }
-    }
-
     public function actionAccept($id): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $storageRepository = new StorageRepository();
             $list = $storageRepository->findProductListById($id);
-            if (!is_null($list->customer_id)){
+            if (!$list->getProducts()->exists()) {
+                throw new DomainException(message: "List ichida bironta ham mahsulot mavjud emas!", code: 422);
+            }
+            if (in_array($list->status, [ProductList::STATUS_UNPAID, ProductList::STATUS_COMPLETE])) {
+                throw new DomainException(message: "List aktiv holatda!", code: 422);
+            }
+            if (!is_null($list->customer_id)) {
                 $accountingRepository = new AccountingRepository();
                 $accountingRepository->calculateProductList($list);
+                $list->status = ProductList::STATUS_UNPAID;
+            } else {
+                $list->status = ProductList::STATUS_COMPLETE;
             }
             ProductHistory::updateAll(['status' => ProductHistory::STATUS_ACTIVE], "product_list_id={$list->id}");
-            $list->status = ProductList::STATUS_ACTIVE;
             $list->save();
             $transaction->commit();
             return ResponseHelper::okResponse($list);
-        } catch (Exception|NotFoundHttpException $e) {
-            return ResponseHelper::errorResponse($e->getMessage(), $e->getCode());
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
+            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
+        }
+    }
+
+    public function actionPay($id): array
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $storageRepository = new StorageRepository();
+            $list = $storageRepository->findProductListById($id);
+            if (!is_null($list->customer_id)) {
+                $accountingRepository = new AccountingRepository();
+                $findTransactionDto = new GetTransactionDTO();
+                $findTransactionDto->model = $list::class;
+                $findTransactionDto->model_id = $list->id;
+                $updateData = [
+                    'is_cash' => 1,
+                    'type' => Transaction::TYPE_OUTCOME
+                ];
+                $transaction = $accountingRepository->updateOrCreateTransaction($findTransactionDto, $updateData, true);
+            }
+            $list->status = ProductList::STATUS_COMPLETE;
+            $list->save();
+            $transaction->commit();
+            return ResponseHelper::okResponse($list);
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
+            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
+        }
+    }
+
+    public function actionReturn($id): array
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $storageRepository = new StorageRepository();
+            $list = $storageRepository->findProductListById($id);
+            if (!is_null($list->customer_id)) {
+                $accountingRepository = new AccountingRepository();
+                $getTransactionDto = new GetTransactionDTO();
+                $getTransactionDto->model_id = $list->id;
+                $getTransactionDto->model = $list::class;
+                $accountingRepository->inactivatedTransaction($getTransactionDto);
+            }
+            ProductHistory::updateAll(['status' => ProductHistory::STATUS_WAIT], "product_list_id={$list->id}");
+            $list->status = ProductList::STATUS_WAIT;
+            $list->save();
+            $transaction->commit();
+            return ResponseHelper::okResponse($list);
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
+            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
         }
     }
 }

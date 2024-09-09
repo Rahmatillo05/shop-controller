@@ -24,9 +24,10 @@ use yii\db\ActiveQuery;
  */
 class ProductList extends \app\models\BaseModel
 {
-    const STATUS_ACTIVE = 1;
+    const STATUS_UNPAID = 1;
     const STATUS_INACTIVE = 0;
-    const STATUS_waiting = 2;
+    const STATUS_WAIT = 2;
+    const STATUS_COMPLETE = 10;
 
 
     /**
@@ -87,11 +88,16 @@ class ProductList extends \app\models\BaseModel
         return (float)$this->getProducts()->sum("(price*amount)");
     }
 
+    public function getTotalProductCount(): int
+    {
+        return (int)$this->getProducts()->count();
+    }
     public function extraFields(): array
     {
         return [
             'customer',
-            'totalSum'
+            'totalSum',
+            'totalProductCount',
         ];
     }
 
