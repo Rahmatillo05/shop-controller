@@ -60,14 +60,25 @@ return [
     ],
     [
         'class' => 'yii\rest\UrlRule',
-        'controller' => 'order',
+        'controller' => 'setting',
         'extraPatterns' => [
         ],
     ],
     [
         'class' => 'yii\rest\UrlRule',
-        'controller' => 'setting',
+        'controller' => 'order',
+        'extraPatterns' => [
+            'POST accept/<id:>' => 'accept',
+            'OPTIONS accept/<id:>' => 'options',
+
+            'POST return/<id:>' => 'return',
+            'OPTIONS return/<id:>' => 'options',
+        ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
+        'controller' => 'order-good',
         'extraPatterns' => [
         ],
-    ]
+    ],
 ];

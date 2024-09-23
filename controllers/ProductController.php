@@ -31,7 +31,7 @@ class ProductController extends DefaultController
     public function prepareDataProvider(): ActiveDataProvider
     {
         $query = $this->modelClass::find();
-        $this->search($query, ['name']);
+        $this->search($query, ['name','barcode']);
         $this->filter($query);
         return new ActiveDataProvider([
             'query' => $query

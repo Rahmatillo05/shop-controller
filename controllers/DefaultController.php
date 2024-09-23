@@ -64,7 +64,7 @@ class DefaultController extends ActiveController
     {
         $search = $this->request->getQueryParam('search');
         if ($search) {
-            if (is_numeric($search)) {
+            if (is_numeric($search) && $search < 99999) {
                 $column = empty($table) ? 'id' : $table . '.id';
                 $query->andWhere([$column => $search]);
             } else {

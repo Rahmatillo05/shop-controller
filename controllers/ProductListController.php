@@ -98,6 +98,9 @@ class ProductListController extends DefaultController
         try {
             $storageRepository = new StorageRepository();
             $list = $storageRepository->findProductListById($id);
+            if ($list->status === ProductList::STATUS_COMPLETE) {
+                throw new DomainException("List aktiv holatda!", code: 422);
+            }
             if (!is_null($list->customer_id)) {
                 $accountingRepository = new AccountingRepository();
                 $findTransactionDto = new GetTransactionDTO();
@@ -105,9 +108,10 @@ class ProductListController extends DefaultController
                 $findTransactionDto->model_id = $list->id;
                 $updateData = [
                     'is_cash' => 1,
-                    'type' => Transaction::TYPE_OUTCOME
+                    'type' => Transaction::TYPE_OUTCOME,
+                    'transaction_date' => time()
                 ];
-                $transaction = $accountingRepository->updateOrCreateTransaction($findTransactionDto, $updateData, true);
+                $accountingRepository->updateOrCreateTransactionWithArray($findTransactionDto, $updateData, true);
             }
             $list->status = ProductList::STATUS_COMPLETE;
             $list->save();
@@ -132,7 +136,7 @@ class ProductListController extends DefaultController
                 $accountingRepository->inactivatedTransaction($getTransactionDto);
             }
             ProductHistory::updateAll(['status' => ProductHistory::STATUS_WAIT], "product_list_id={$list->id}");
-            $list->status = ProductList::STATUS_WAIT;
+            $list->status = ProductList::STATUS_INACTIVE;
             $list->save();
             $transaction->commit();
             return ResponseHelper::okResponse($list);

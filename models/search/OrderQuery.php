@@ -17,8 +17,8 @@ class OrderQuery extends Order
     public function rules(): array
     {
         return [
-            [['id', 'user_id', 'status', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
-            [['payment_type', 'comment'], 'safe'],
+            [['id', 'user_id', 'payment_type', 'status', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['comment'], 'safe'],
         ];
     }
 

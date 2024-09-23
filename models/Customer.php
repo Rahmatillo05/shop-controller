@@ -128,8 +128,16 @@ where customer_id = {$this->id}
   and status <> {$statusInActive}
 group by type
 SQL;
-        $balance = Yii::$app->db->createCommand($sql)->queryOne();
-        if ($balance){
+        $transactions = Yii::$app->db->createCommand($sql)->queryAll();
+        $balance = [
+            'credit' => 0,
+            'debit' => 0,
+        ];
+        foreach ($transactions as $transaction) {
+            $balance['credit'] += $transaction['credit'];
+            $balance['debit'] += $transaction['debit'];
+        }
+        if ($balance) {
             return new CustomerBalance((float)$balance['credit'], (float)$balance['debit']);
         }
         return new CustomerBalance(0, 0);

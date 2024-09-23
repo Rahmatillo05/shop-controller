@@ -16,7 +16,7 @@ class m240818_195456_create_orders_table extends Migration
             'id' => $this->primaryKey(),
             'user_id' => $this->integer()->notNull(),
             'status' => $this->integer()->notNull()->defaultValue(0),
-            'payment_type' => $this->string()->notNull(),
+            'payment_type' => $this->integer()->notNull(),
             'customer_id' => $this->integer(),
             'accepted_at' => $this->integer(),
             'comment' => $this->text(),

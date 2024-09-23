@@ -44,9 +44,11 @@ class Order extends BaseModel
     {
         $behaviors = parent::behaviors();
         return ArrayHelper::merge($behaviors, [
-            'class' => BlameableBehavior::class,
-            'createdByAttribute' => 'user_id',
-            'updatedByAttribute' => false
+            [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'user_id',
+                'updatedByAttribute' => false
+            ]
         ]);
     }
 
@@ -56,11 +58,11 @@ class Order extends BaseModel
     public function rules(): array
     {
         return [
-            [['user_id', 'payment_type'], 'required'],
-            [['user_id', 'status', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['user_id', 'status', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['payment_type'], 'required'],
+            [['status'], 'default', 'value' => self::STATUS_INACTIVE],
+            [['user_id', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
+            [['user_id', 'status', 'payment_type', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['comment'], 'string'],
-            [['payment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['customer_id' => 'id']],
         ];
@@ -84,15 +86,16 @@ class Order extends BaseModel
             'updated_at' => 'Updated At',
         ];
     }
-public static function find(): ActiveQuery
-{
-    $query = parent::find();
-    $user = User::current();
-    if ($user->user_role === User::ROLE_SELLER){
-        $query->andWhere(['orders.user_id' => $user->id]);
+
+    public static function find(): ActiveQuery
+    {
+        $query = parent::find();
+        $user = User::current();
+        if ($user->user_role === User::ROLE_SELLER) {
+            $query->andWhere(['orders.user_id' => $user->id]);
+        }
+        return $query;
     }
-    return $query;
-}
 
     /**
      * Gets query for [[Customer]].
@@ -124,11 +127,18 @@ public static function find(): ActiveQuery
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
+    public function getTransaction(): ActiveQuery
+    {
+        return $this->hasOne(Transaction::class, ['model_id' => 'id'])->andWhere(['transactions.model_class' => self::class]);
+    }
+
     public function extraFields(): array
     {
         return [
             'user',
-            'customer'
+            'customer',
+            'orderGoods',
+            'transaction'
         ];
     }
 }

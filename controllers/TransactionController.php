@@ -10,4 +10,6 @@ class TransactionController extends DefaultController
 {
    public $modelClass = 'app\models\Transaction';
    public $searchModelClass = 'app\models\search\TransactionQuery';
+
+
 }

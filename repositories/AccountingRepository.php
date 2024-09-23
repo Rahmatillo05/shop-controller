@@ -13,6 +13,7 @@ class AccountingRepository
 {
     /**
      * @throws Exception
+     * @throws NotFoundHttpException
      */
     public function calculateProductList(ProductList $list): ?Transaction
     {
@@ -21,24 +22,28 @@ class AccountingRepository
         $transactionDto->amount = $list->totalSum;
         $transactionDto->type = Transaction::TYPE_INCOME;
         $transactionDto->payment_type = Transaction::PAYMENT_OUTGO;
-        $transactionDto->date = $list->date;
+        $transactionDto->date = $list->date ?? time();
         $transactionDto->transaction_date = time();
         $transactionDto->model_id = $list->id;
         $transactionDto->model_class = ProductList::class;
         $transactionDto->comment = $list->comment;
         $transactionDto->is_cash = null;
-        return $this->createTransaction($transactionDto);
+        return $this->updateOrCreateTransaction($transactionDto);
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|NotFoundHttpException
      */
-    public function createTransaction(TransactionDTO $transactionDTO): ?Transaction
+    public function updateOrCreateTransaction(TransactionDTO $transactionDTO, bool $is_create = false): ?Transaction
     {
-        if (!$transactionDTO->transaction_id) {
-            $transaction = $this->findOrNewTransactionByModel($transactionDTO->model_id, $transactionDTO->model_class);
+        if ($is_create) {
+            $transaction = new Transaction();
         } else {
-            $transaction = $this->findOrNewTransactionById($transactionDTO->transaction_id);
+            if (!$transactionDTO->transaction_id) {
+                $transaction = $this->findOrNewTransactionByModel($transactionDTO->model_id, $transactionDTO->model_class);
+            } else {
+                $transaction = $this->findOrNewTransactionById($transactionDTO->transaction_id);
+            }
         }
         $transaction->model_id = $transactionDTO->model_id;
         $transaction->model_class = $transactionDTO->model_class;
@@ -112,7 +117,7 @@ class AccountingRepository
      * @throws NotFoundHttpException
      * @throws Exception
      */
-    public function updateOrCreateTransaction(GetTransactionDTO $findTransactionDto, array $updateTransactionDTO, $is_create = false): ?Transaction
+    public function updateOrCreateTransactionWithArray(GetTransactionDTO $findTransactionDto, array $updateTransactionDTO, $is_create = false): ?Transaction
     {
         $transaction = $this->findTransaction($findTransactionDto);
         if ($is_create) {
@@ -121,14 +126,18 @@ class AccountingRepository
             foreach ($updateTransactionDTO as $field => $value) {
                 $_transaction->{$field} = $value;
             }
+            if (!$_transaction->save()) {
+                throw new \DomainException(json_encode($_transaction->errors));
+            }
+            return $_transaction;
         } else {
             foreach ($updateTransactionDTO as $field => $value) {
                 $transaction->{$field} = $value;
             }
+            if (!$transaction->save()) {
+                throw new \DomainException(json_encode($transaction->errors));
+            }
+            return $transaction;
         }
-        if (!$transaction->save()) {
-            throw new \DomainException(json_encode($transaction->errors), 422);
-        }
-        return $transaction;
     }
 }
