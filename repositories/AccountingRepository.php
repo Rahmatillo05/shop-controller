@@ -140,4 +140,8 @@ class AccountingRepository
             return $transaction;
         }
     }
+
+    public function createTransactionForOrder(\app\models\Order $order, \app\DTOs\AcceptOrderDTO $acceptOrderDTO)
+    {
+    }
 }

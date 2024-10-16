@@ -23,18 +23,19 @@ class StorageRepository
         }
         return $product;
     }
+
     /**
      * @throws Exception
      */
     public function createOutgoRecord(OrderGood $orderGood): ProductHistory
     {
-        $history = new ProductHistory();
+        $history = $this->findOrCreateProductHistoryByOrderGoods($orderGood);
         $history->amount = $orderGood->amount;
         $history->sale_price = $orderGood->price_sale;
         $history->price = $orderGood->price;
         $history->product_id = $orderGood->product_id;
         $history->order_id = $orderGood->order_id;
-        $history->type= ProductHistory::TYPE_OUTCOME;
+        $history->type = ProductHistory::TYPE_OUTCOME;
         $history->status = ProductHistory::STATUS_ACTIVE;
         if ($history->save()) {
             return $history;
@@ -61,8 +62,21 @@ class StorageRepository
     {
         $history = ProductHistory::findOne($id);
         if (!$history) {
-            throw new NotFoundHttpException("Mahsulotlar listi topilmadi!", 404);
+            throw new NotFoundHttpException("Mahsulot topilmadi!", 404);
         }
         return $history;
+    }
+
+    private function findOrCreateProductHistoryByOrderGoods(OrderGood $orderGood): ProductHistory
+    {
+        $history = ProductHistory::findOne([
+            'order_id' => $orderGood->order_id,
+            'product_id' => $orderGood->product_id,
+            'type' => ProductHistory::TYPE_OUTCOME
+        ]);
+        if ($history) {
+            return $history;
+        }
+        return new ProductHistory();
     }
 }

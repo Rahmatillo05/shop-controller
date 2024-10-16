@@ -14,6 +14,7 @@ use yii\db\ActiveQuery;
  * @property int|null $product_id
  * @property float|null $amount
  * @property float|null $price
+ * @property float|null $coming_price
  * @property float|null $price_sale
  * @property int|null $deleted_at
  * @property int|null $created_at
@@ -41,7 +42,7 @@ class OrderGood extends \app\models\BaseModel
             [['order_id'], 'required'],
             [['order_id', 'product_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['order_id', 'product_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
-            [['amount', 'price', 'price_sale'], 'number'],
+            [['amount', 'price', 'price_sale', 'coming_price'], 'number'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['product_id' => 'id']],
         ];
