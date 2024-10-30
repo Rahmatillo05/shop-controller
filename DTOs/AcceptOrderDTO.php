@@ -20,8 +20,11 @@ class AcceptOrderDTO
         if (is_null($this->payment_type)) {
             throw new DomainException("To'lov turini tanlash shart!", 422);
         }
+        if (!in_array($this->payment_type, [Transaction::PAYMENT_TYPE_MIX, Transaction::PAYMENT_TYPE_CARD, Transaction::PAYMENT_TYPE_CASH])) {
+            throw new DomainException("Siz yuborgan to'lov turi mavjud emas!", 422);
+        }
         if (!is_array($amounts)){
-            throw new DomainException("Amounts must be array!", 500);
+            throw new DomainException("Amounts must be array!", 422);
         }
         $this->amounts = $amounts;
         if ($this->payment_type === Transaction::PAYMENT_TYPE_MIX) {

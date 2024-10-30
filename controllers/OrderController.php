@@ -7,6 +7,7 @@ use app\helpers\ResponseHelper;
 use app\models\Order;
 use app\models\search\OrderQuery;
 use app\repositories\OrderRepository;
+use DomainException;
 use Yii;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
@@ -29,12 +30,16 @@ class OrderController extends DefaultController
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $acceptOrderDto = new AcceptOrderDTO(Yii::$app->request);
             $order = $this->orderRepository->findById($id);
+            if ($order->status === Order::STATUS_ACTIVE){
+                throw new DomainException("Buyurtma faol holatda!", 400);
+            }
+            $acceptOrderDto = new AcceptOrderDTO(Yii::$app->request);
+            $acceptOrderDto->order = $order;
             $this->orderRepository->orderAccept($order, $acceptOrderDto);
             $transaction->commit();
             return ResponseHelper::okResponse($order);
-        } catch (Exception|NotFoundHttpException $e) {
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
             $transaction->rollBack();
             return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
         }

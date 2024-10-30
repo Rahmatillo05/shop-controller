@@ -24,6 +24,12 @@ return [
     ],
     [
         'class' => 'yii\rest\UrlRule',
+        'controller' => 'transaction',
+        'extraPatterns' => [
+        ],
+    ],
+    [
+        'class' => 'yii\rest\UrlRule',
         'controller' => 'product',
         'extraPatterns' => [
             'GET find-by-barcode/<barcode:>' => 'find-by-barcode',

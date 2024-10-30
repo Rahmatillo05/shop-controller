@@ -42,6 +42,6 @@ class OrderRepository
         foreach ($order->orderGoods as $orderGood) {
             $storageRepository->createOutgoRecord($orderGood);
         }
-        $accountingRepository->createTransactionForOrder($order, $acceptOrderDTO);
+        $accountingRepository->createTransactionForOrder($acceptOrderDTO);
     }
 }

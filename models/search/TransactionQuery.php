@@ -17,7 +17,7 @@ class TransactionQuery extends Transaction
     public function rules(): array
     {
         return [
-            [['id', 'date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'date', 'customer_id', 'type', 'payment_type', 'status', 'model_id', 'deleted_at', 'created_at', 'updated_at', 'is_cash'], 'integer'],
             [['amount'], 'number'],
             [['comment', 'model_class'], 'safe'],
         ];

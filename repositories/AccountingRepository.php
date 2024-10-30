@@ -2,6 +2,7 @@
 
 namespace app\repositories;
 
+use app\DTOs\AcceptOrderDTO;
 use app\DTOs\GetTransactionDTO;
 use app\DTOs\TransactionDTO;
 use app\models\ProductList;
@@ -32,7 +33,7 @@ class AccountingRepository
     }
 
     /**
-     * @throws Exception|NotFoundHttpException
+     * @throws Exception
      */
     public function updateOrCreateTransaction(TransactionDTO $transactionDTO, bool $is_create = false): ?Transaction
     {
@@ -141,7 +142,8 @@ class AccountingRepository
         }
     }
 
-    public function createTransactionForOrder(\app\models\Order $order, \app\DTOs\AcceptOrderDTO $acceptOrderDTO)
+    public function createTransactionForOrder(AcceptOrderDTO $acceptOrderDTO)
     {
+
     }
 }
