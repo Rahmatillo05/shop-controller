@@ -26,7 +26,7 @@ class OrderController extends DefaultController
         $this->orderRepository = new OrderRepository();
     }
 
-    public function actionAccept($id): array
+    public function actionAccept($id)
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -36,6 +36,7 @@ class OrderController extends DefaultController
             }
             $acceptOrderDto = new AcceptOrderDTO(Yii::$app->request);
             $acceptOrderDto->order = $order;
+            return $acceptOrderDto->validateTotalSum();
             $this->orderRepository->orderAccept($order, $acceptOrderDto);
             $transaction->commit();
             return ResponseHelper::okResponse($order);

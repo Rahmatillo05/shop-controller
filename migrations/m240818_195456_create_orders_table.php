@@ -25,7 +25,7 @@ class m240818_195456_create_orders_table extends Migration
             'updated_at' => $this->integer(),
         ]);
         $this->addForeignKey('fk_orders_user_id', 'orders', 'user_id', 'users', 'id');
-        $this->addForeignKey('fk_orders_customer_id', 'orders', 'customer_id', 'users', 'id');
+        $this->addForeignKey('fk_orders_customer_id', 'orders', 'customer_id', 'customers', 'id');
         $this->createIndex('idx_orders_customer_id', 'orders', 'customer_id');
         $this->createIndex('idx_orders_user_id', 'orders', 'user_id');
     }

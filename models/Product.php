@@ -26,6 +26,7 @@ use yii\helpers\ArrayHelper;
  * @property int|null $updated_at
  *
  * @property Category $category
+ * @property Unit $unit
  */
 class Product extends \app\models\BaseModel
 {
@@ -85,7 +86,7 @@ class Product extends \app\models\BaseModel
 
     public function extraFields(): array
     {
-        return ['category'];
+        return ['category', 'unit'];
     }
 
     public static function findByBarcode($barcode): ?Product
@@ -102,6 +103,12 @@ class Product extends \app\models\BaseModel
     public function getCategory(): search\CategoryQuery|ActiveQuery
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
+    }
+
+    public function getUnit(): ActiveQuery
+    {
+        return $this->hasOne(Unit::class, ['id' => 'unit_id'])
+            ->via('category');
     }
 
     public function getProductHistory(): ActiveQuery

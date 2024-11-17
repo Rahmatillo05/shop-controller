@@ -23,7 +23,10 @@ use yii\helpers\ArrayHelper;
  * @property int|null $created_at
  * @property int|null $updated_at
  *
- * @property User $customer
+ * @property float|null $orderSum
+ * @property float|null $orderSumMin
+ *
+ * @property Customer $customer
  * @property OrderGood[] $orderGoods
  * @property User $user
  */
@@ -64,7 +67,7 @@ class Order extends BaseModel
             [['user_id', 'status', 'payment_type', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['comment'], 'string'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
-            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['customer_id' => 'id']],
+            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'id']],
         ];
     }
 
@@ -93,6 +96,7 @@ class Order extends BaseModel
         $user = User::current();
         if ($user->user_role === User::ROLE_SELLER) {
             $query->andWhere(['orders.user_id' => $user->id]);
+            $query->andWhere(['orders.status' => self::STATUS_INACTIVE]);
         }
         return $query;
     }
@@ -104,7 +108,7 @@ class Order extends BaseModel
      */
     public function getCustomer(): ActiveQuery
     {
-        return $this->hasOne(User::class, ['id' => 'customer_id']);
+        return $this->hasOne(Customer::class, ['id' => 'customer_id']);
     }
 
     /**
@@ -133,13 +137,35 @@ class Order extends BaseModel
             ->andWhere(['transactions.model_class' => self::class]);
     }
 
+    public function fields(): array
+    {
+        $fields = parent::fields();
+        return ArrayHelper::merge($fields, []);
+    }
+
+    public function getOrderSum(): float|null
+    {
+        return $this->getOrderGoods()->sum('(price * amount)');
+    }
+    public function getOrderSumMin(): float|null
+    {
+        return $this->getOrderGoods()->sum('(price_sale * amount)');
+    }
+
+    public function getOrderGoodsCount()
+    {
+        return $this->getOrderGoods()->count();
+    }
+
     public function extraFields(): array
     {
         return [
             'user',
             'customer',
             'orderGoods',
-            'transaction'
+            'transaction',
+            'orderGoodsCount',
+            'orderSum'
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\search\ProductQuery;
 use Yii;
+use yii\behaviors\AttributeBehavior;
 use yii\db\ActiveQuery;
 
 /**
@@ -33,18 +34,64 @@ class OrderGood extends \app\models\BaseModel
         return 'order_goods';
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['price'] = [
+            'class' => AttributeBehavior::class,
+            'attributes' => [
+                self::EVENT_BEFORE_INSERT => 'price',
+            ],
+            'value' => function ($event) {
+                if (is_null($this->price)) {
+                    return $this->product->sale_price;
+                }
+                return $this->price;
+            }
+        ];
+
+        $behaviors['price_sale'] = [
+            'class' => AttributeBehavior::class,
+            'attributes' => [
+                self::EVENT_BEFORE_INSERT => 'price_sale',
+            ],
+            'value' => function ($event) {
+                if (is_null($this->price_sale)) {
+                    return $this->product->sale_price_min;
+                }
+                return $this->price_sale;
+            }
+        ];
+        $behaviors['coming_price'] = [
+            'class' => AttributeBehavior::class,
+            'attributes' => [
+                self::EVENT_BEFORE_INSERT => 'coming_price',
+            ],
+            'value' => function ($event) {
+                if (is_null($this->coming_price)) {
+                    return $this->product->price;
+                }
+                return $this->coming_price;
+            }
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules(): array
     {
         return [
-            [['order_id'], 'required'],
+            [['order_id', 'product_id', 'amount'], 'required'],
             [['order_id', 'product_id', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['order_id', 'product_id', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
             [['amount', 'price', 'price_sale', 'coming_price'], 'number'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['product_id' => 'id']],
+            [['amount'], 'validateAmount'],
+            [['price'], 'validatePrice']
         ];
     }
 
@@ -64,6 +111,27 @@ class OrderGood extends \app\models\BaseModel
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function validateAmount(): void
+    {
+        if ($this->amount <= 0){
+            $this->addError('amount', "Mahsulot miqdori noto'g'ri kiritildi!");
+            return;
+        }
+        if (!is_null($this->product) && $this->amount > $this->product->remind) {
+            $this->addError('amount', "Omborda buncha mahsulot mavjud emas! Qoldiq: {$this->product->remind} {$this->product->unit->name}");
+        }
+    }
+    public function validatePrice(): void
+    {
+        if ($this->price <= 0){
+            $this->addError('price', "Mahsulot narxi noto'g'ri kiritildi!");
+            return;
+        }
+        if (!is_null($this->product) && $this->price < $this->product->sale_price_min) {
+            $this->addError('price', "Sotish narxi minimal narxdan past kiritildi!");
+        }
     }
 
     /**

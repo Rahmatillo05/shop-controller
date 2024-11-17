@@ -36,10 +36,10 @@ class Transaction extends \app\models\BaseModel
 
     const PAYMENT_TYPE_CASH = 1;
     const PAYMENT_TYPE_CARD = 2;
-    const PAYMENT_TYPE_MIX = 3;
     const PAYMENT_OUTGO = 4;
     const STATUS_ACTIVE = 1;
     const STATUS_INACTIVE = 0;
+    const PAYMENT_TYPE_DEBT = 3;
 
     /**
      * {@inheritdoc}

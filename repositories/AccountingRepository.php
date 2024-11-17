@@ -144,6 +144,6 @@ class AccountingRepository
 
     public function createTransactionForOrder(AcceptOrderDTO $acceptOrderDTO)
     {
-
+        
     }
 }
