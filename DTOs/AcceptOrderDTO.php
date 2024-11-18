@@ -18,6 +18,8 @@ class AcceptOrderDTO
     public ?TypeCard $paymentCard = null;
     public ?TypeDebt $paymentDebt = null;
 
+    public bool $isMixPay = false;
+
     protected array $paymentTypes = [
         Transaction::PAYMENT_TYPE_CARD,
         Transaction::PAYMENT_TYPE_CASH,
@@ -53,6 +55,10 @@ class AcceptOrderDTO
                     break;
             }
         }
+
+        if (count($payments) > 1) {
+            $this->isMixPay = true;
+        }
     }
 
     public function getTotalSum(): ?float
@@ -68,5 +74,26 @@ class AcceptOrderDTO
             throw new DomainException("To'lanayotgan summa buyurtmaning minimal qiymatidan kam! Minimal summa: $orderMinSum so'm", 422);
         }
         return true;
+    }
+
+    public function getPaymentType(): int
+    {
+        if (!$this->isMixPay) {
+            if (!is_null($this->paymentDebt)) {
+                return Transaction::PAYMENT_TYPE_DEBT;
+            }
+            if (!is_null($this->paymentCard)) {
+                return Transaction::PAYMENT_TYPE_CARD;
+            }
+            if (!is_null($this->paymentCash)) {
+                return Transaction::PAYMENT_TYPE_CASH;
+            }
+        }
+        return Transaction::PAYMENT_TYPE_MIX;
+    }
+
+    public function getCustomerID(): ?int
+    {
+        return $this->paymentDebt?->customer_id;
     }
 }

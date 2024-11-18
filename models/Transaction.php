@@ -40,6 +40,7 @@ class Transaction extends \app\models\BaseModel
     const STATUS_ACTIVE = 1;
     const STATUS_INACTIVE = 0;
     const PAYMENT_TYPE_DEBT = 3;
+    const PAYMENT_TYPE_MIX = 5;
 
     /**
      * {@inheritdoc}

@@ -6,7 +6,7 @@ class TransactionDTO
 {
     public int|null $date;
     public int|null $transaction_date;
-    public null|int $customer_id;
+    public null|int $customer_id = null;
     public int $type;
     public float $amount;
     public int $payment_type;

@@ -26,18 +26,22 @@ class OrderController extends DefaultController
         $this->orderRepository = new OrderRepository();
     }
 
-    public function actionAccept($id)
+    public function actionAccept($id): array
     {
+        $request = Yii::$app->request;
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $order = $this->orderRepository->findById($id);
-            if ($order->status === Order::STATUS_ACTIVE){
+            $order->accepted_at = time();
+            $order->comment = $request->post('comment');
+            if ($order->status === Order::STATUS_ACTIVE) {
                 throw new DomainException("Buyurtma faol holatda!", 400);
             }
-            $acceptOrderDto = new AcceptOrderDTO(Yii::$app->request);
+            $acceptOrderDto = new AcceptOrderDTO($request);
             $acceptOrderDto->order = $order;
-            return $acceptOrderDto->validateTotalSum();
-            $this->orderRepository->orderAccept($order, $acceptOrderDto);
+            if ($acceptOrderDto->validateTotalSum()) {
+                $this->orderRepository->orderAccept($order, $acceptOrderDto);
+            }
             $transaction->commit();
             return ResponseHelper::okResponse($order);
         } catch (Exception|NotFoundHttpException|DomainException $e) {

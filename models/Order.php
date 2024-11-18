@@ -134,7 +134,8 @@ class Order extends BaseModel
     public function getTransaction(): ActiveQuery
     {
         return $this->hasOne(Transaction::class, ['model_id' => 'id'])
-            ->andWhere(['transactions.model_class' => self::class]);
+            ->andWhere(['transactions.model_class' => self::class])
+            ->andWhere(['transactions.relation_id' => null]);
     }
 
     public function fields(): array

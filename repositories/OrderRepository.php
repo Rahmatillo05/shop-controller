@@ -38,10 +38,19 @@ class OrderRepository
     {
         $storageRepository = new StorageRepository();
         $accountingRepository = new AccountingRepository();
-        $order->loadRelations('orderGoods');
+        $order->loadRelations('orderGoods.product');
         foreach ($order->orderGoods as $orderGood) {
+            if ($orderGood->amount > $orderGood->product->remind){
+                throw new DomainException("{$orderGood->product->name} mahsuloti so'ralgan miqdordan kam qolgan! Qoldiq: {$orderGood->product->remind} {$orderGood->product->unit->name}", 422);
+            }
             $storageRepository->createOutgoRecord($orderGood);
         }
-        $accountingRepository->createTransactionForOrder($acceptOrderDTO);
+        $transaction = $accountingRepository->createTransactionForOrder($acceptOrderDTO);
+        $order->customer_id = $acceptOrderDTO->getCustomerID();
+        $order->payment_type = $transaction->payment_type;
+        $order->status = Order::STATUS_ACTIVE;
+        if (!$order->save()){
+            throw new DomainException("Buyurtmani tasdiqlashda xatolik bor!");
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\ResponseHelper;
+use app\models\Order;
 use app\models\OrderGood;
 use app\models\search\OrderGoodQuery;
 use app\repositories\OrderRepository;
@@ -40,6 +41,9 @@ class OrderGoodController extends DefaultController
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $order = $orderRepository->findById($model->order_id);
+            if ($order->status !== Order::STATUS_INACTIVE){
+                throw new DomainException("Ushbu buyurtmaga maahsulot qo'shish taqiqlangan!", 422);
+            }
             if ($order->getOrderGoods()->andWhere(['product_id' => $model->product_id])->exists()) {
                 throw new DomainException("Ushbu mahsulot bu buyurtmaga allaqachon qo'shilgan", 422);
             }

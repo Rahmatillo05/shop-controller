@@ -5,6 +5,7 @@ namespace app\repositories;
 use app\DTOs\AcceptOrderDTO;
 use app\DTOs\GetTransactionDTO;
 use app\DTOs\TransactionDTO;
+use app\models\Order;
 use app\models\ProductList;
 use app\models\Transaction;
 use yii\db\Exception;
@@ -142,8 +143,51 @@ class AccountingRepository
         }
     }
 
-    public function createTransactionForOrder(AcceptOrderDTO $acceptOrderDTO)
+    /**
+     * @throws Exception
+     */
+    public function createTransactionForOrder(AcceptOrderDTO $acceptOrderDTO): ?Transaction
     {
-        
+        $transactionDto = new TransactionDTO();
+        $transactionDto->amount = $acceptOrderDTO->getTotalSum();
+        $transactionDto->type = Transaction::TYPE_INCOME;
+        $transactionDto->date = $acceptOrderDTO->order->accepted_at;
+        $transactionDto->transaction_date = time();
+        $transactionDto->model_class = Order::class;
+        $transactionDto->model_id = $acceptOrderDTO->order->id;
+        $transactionDto->is_cash = 1;
+        if ($acceptOrderDTO->isMixPay) {
+            $transactionDto->payment_type = Transaction::PAYMENT_TYPE_MIX;
+            return $this->createMultiTransactions($transactionDto, $acceptOrderDTO);
+        } else {
+            $transactionDto->payment_type = $acceptOrderDTO->getPaymentType();
+            return $this->updateOrCreateTransaction($transactionDto, true);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function createMultiTransactions(TransactionDTO $transactionDto, AcceptOrderDTO $acceptOrderDTO): ?Transaction
+    {
+        $transaction = $this->updateOrCreateTransaction($transactionDto, true);
+        $transactionDto->relation_id = $transaction->id;
+        if (!is_null($acceptOrderDTO->paymentCash)) {
+            $transactionDto->amount = $acceptOrderDTO->paymentCash->amount;
+            $transactionDto->payment_type = $acceptOrderDTO->paymentCash->payment_type;
+            $this->updateOrCreateTransaction($transactionDto, true);
+        }
+        if (!is_null($acceptOrderDTO->paymentCard)) {
+            $transactionDto->amount = $acceptOrderDTO->paymentCard->amount;
+            $transactionDto->payment_type = $acceptOrderDTO->paymentCard->payment_type;
+            $this->updateOrCreateTransaction($transactionDto, true);
+        }
+        if (!is_null($acceptOrderDTO->paymentDebt)) {
+            $transactionDto->amount = $acceptOrderDTO->paymentDebt->amount;
+            $transactionDto->payment_type = $acceptOrderDTO->paymentDebt->payment_type;
+            $transactionDto->customer_id = $acceptOrderDTO->paymentDebt->customer_id;
+            $this->updateOrCreateTransaction($transactionDto, true);
+        }
+        return $transaction;
     }
 }
