@@ -25,7 +25,7 @@ class OrderGoodController extends DefaultController
     public function actions(): array
     {
         $actions = parent::actions();
-        unset($actions['create']);
+        unset($actions['create'], $actions['update'], $actions['delete']);
         return $actions;
     }
 
@@ -49,6 +49,61 @@ class OrderGoodController extends DefaultController
             }
             if (!$model->save()) {
                 throw new DomainException("Mahsulotni qo'shib bo'lmadi", 500);
+            }
+            $transaction->commit();
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
+            $transaction->rollBack();
+            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
+        }
+
+        return ResponseHelper::okResponse($model);
+    }
+
+    public function actionUpdate($id): array
+    {
+        $data = Yii::$app->request->post();
+        $model = OrderGood::findOne($id);
+        if (!$model) {
+            return ResponseHelper::errorResponse("Mahsulot topilmadi", 404);
+        }
+        $model->load($data, '');
+        if (!$model->validate()) {
+            return ResponseHelper::errorResponse($model->errors, code: 422);
+        }
+        $orderRepository = new OrderRepository();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $order = $orderRepository->findById($model->order_id);
+            if ($order->status !== Order::STATUS_INACTIVE){
+                throw new DomainException("Ushbu buyurtmaga maahsulot qo'shish taqiqlangan!", 422);
+            }
+            if (!$model->save()) {
+                throw new DomainException("Mahsulotni qo'shib bo'lmadi", 500);
+            }
+            $transaction->commit();
+        } catch (Exception|NotFoundHttpException|DomainException $e) {
+            $transaction->rollBack();
+            return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
+        }
+
+        return ResponseHelper::okResponse($model);
+    }
+
+    public function actionDelete($id): array
+    {
+        $model = OrderGood::findOne($id);
+        if (!$model) {
+            return ResponseHelper::errorResponse("Mahsulot topilmadi", 404);
+        }
+        $orderRepository = new OrderRepository();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $order = $orderRepository->findById($model->order_id);
+            if ($order->status !== Order::STATUS_INACTIVE){
+                throw new DomainException("Ushbu buyurtmaga maahsulot qo'shish taqiqlangan!", 422);
+            }
+            if (!$model->delete()) {
+                throw new DomainException("Mahsulotni o'chirib bo'lmadi", 500);
             }
             $transaction->commit();
         } catch (Exception|NotFoundHttpException|DomainException $e) {

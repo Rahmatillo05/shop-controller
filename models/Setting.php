@@ -30,7 +30,7 @@ class Setting extends \app\models\BaseModel
     {
         parent::afterSave($insert, $changedAttributes);
 
-        Yii::$app->cache->delete("setting:$this->id");
+        Yii::$app->cache->delete("setting:$this->key");
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\ResponseHelper;
+use app\models\Setting;
 use app\models\User;
 use yii\data\ActiveDataFilter;
 use yii\data\ActiveDataProvider;
@@ -10,6 +11,8 @@ use yii\db\ActiveQuery;
 use yii\db\StaleObjectException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 
 class DefaultController extends ActiveController
 {
@@ -45,6 +48,18 @@ class DefaultController extends ActiveController
     }
 
     /**
+     * @throws BadRequestHttpException|ForbiddenHttpException
+     */
+    public function beforeAction($action): bool
+    {
+        $subscription  = Setting::findByKey('subscription');
+        if ($subscription != 'on') {
+            throw new ForbiddenHttpException("Ilovani ishlatishni davom ettirish uchun to'lovni amalga oshiring!");
+        }
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @throws \Throwable
      * @throws StaleObjectException
      */
@@ -71,9 +86,9 @@ class DefaultController extends ActiveController
                 foreach ($columns as $i => $column) {
                     $column = empty($table) ? $column : $table . '.' . $column;
                     if ($i == 0) {
-                        $query->andWhere(['LIKE', $column, "$search"]);
+                        $query->andWhere(['ILIKE', $column, "$search"]);
                     } else {
-                        $query->orWhere(['LIKE', $column, "$search"]);
+                        $query->orWhere(['ILIKE', $column, "$search"]);
                     }
                 }
             }

@@ -87,4 +87,16 @@ return [
         'extraPatterns' => [
         ],
     ],
+    [
+        'class' => 'yii\rest\UrlRule',
+        'controller' => 'allow',
+        'extraPatterns' => [
+
+            'POST allow' => 'allow',
+            'OPTIONS allow' => 'options',
+
+            'POST dis-allow' => 'dis-allow',
+            'OPTIONS dis-allow' => 'options',
+        ],
+    ],
 ];

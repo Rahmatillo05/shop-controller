@@ -90,17 +90,6 @@ class Order extends BaseModel
         ];
     }
 
-    public static function find(): ActiveQuery
-    {
-        $query = parent::find();
-        $user = User::current();
-        if ($user->user_role === User::ROLE_SELLER) {
-            $query->andWhere(['orders.user_id' => $user->id]);
-            $query->andWhere(['orders.status' => self::STATUS_INACTIVE]);
-        }
-        return $query;
-    }
-
     /**
      * Gets query for [[Customer]].
      *

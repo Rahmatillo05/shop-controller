@@ -120,13 +120,13 @@ class Customer extends BaseModel
     {
         $statusInActive = Transaction::STATUS_INACTIVE;
         $sql = <<<SQL
-select
-    case when type=1 then sum(amount) end as credit,
-    case when type=2 then sum(amount) end as debit
-    from transactions
+select case when (type = 1 and model_class != 'app\models\Order') then sum(amount) end               as credit,
+       case when (type = 2 or (model_class = 'app\models\Order' and type = 1)) then sum(amount) end as debit
+from transactions
 where customer_id = {$this->id}
   and status <> {$statusInActive}
-group by type
+  and deleted_at is null
+group by type, model_class
 SQL;
         $transactions = Yii::$app->db->createCommand($sql)->queryAll();
         $balance = [
