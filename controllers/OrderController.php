@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\DTOs\AcceptOrderDTO;
+use app\DTOs\ReturnOrderDTO;
 use app\helpers\ResponseHelper;
 use app\models\Order;
 use app\models\search\OrderQuery;
@@ -37,10 +38,16 @@ class OrderController extends DefaultController
             if ($order->status === Order::STATUS_ACTIVE) {
                 throw new DomainException("Buyurtma faol holatda!", 400);
             }
-            $acceptOrderDto = new AcceptOrderDTO($request);
-            $acceptOrderDto->order = $order;
-            if ($acceptOrderDto->validateTotalSum()) {
-                $this->orderRepository->orderAccept($order, $acceptOrderDto);
+            if ($order->type === Order::TYPE_RETURNED) {
+                $returnOrderDto = new ReturnOrderDTO($request);
+                $returnOrderDto->order = $order;
+                $this->orderRepository->orderReturn($order, $returnOrderDto);
+            } else {
+                $acceptOrderDto = new AcceptOrderDTO($request);
+                $acceptOrderDto->order = $order;
+                if ($acceptOrderDto->validateTotalSum()) {
+                    $this->orderRepository->orderAccept($order, $acceptOrderDto);
+                }
             }
             $transaction->commit();
             return ResponseHelper::okResponse($order);
@@ -48,10 +55,5 @@ class OrderController extends DefaultController
             $transaction->rollBack();
             return ResponseHelper::errorResponse(message: $e->getMessage(), code: $e->getCode());
         }
-    }
-
-    public function actionReturn($id)
-    {
-        return $this->modelClass::findOne($id);
     }
 }

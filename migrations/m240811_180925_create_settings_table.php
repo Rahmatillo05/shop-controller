@@ -28,12 +28,6 @@ class m240811_180925_create_settings_table extends Migration
             'type' => 2,
             'key' => 'card_percentage'
         ]);
-        $this->insert('{{%settings}}', [
-            'title'=> "To'lov",
-            'value' => "on",
-            'type' => 2,
-            'key' => 'subscription'
-        ]);
     }
 
     /**

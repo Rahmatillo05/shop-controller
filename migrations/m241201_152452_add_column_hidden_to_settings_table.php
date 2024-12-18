@@ -13,6 +13,13 @@ class m241201_152452_add_column_hidden_to_settings_table extends Migration
     public function safeUp()
     {
         $this->addColumn('settings', 'hidden', $this->tinyInteger()->defaultValue(0)->after('value'));
+        $this->insert('{{%settings}}', [
+            'title'=> "To'lov",
+            'value' => "on",
+            'type' => 2,
+            'key' => 'subscription',
+            'hidden' => 1
+        ]);
     }
 
     /**

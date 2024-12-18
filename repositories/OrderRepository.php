@@ -4,6 +4,7 @@ namespace app\repositories;
 
 use app\DTOs\AcceptOrderDTO;
 use app\DTOs\OrderSum;
+use app\DTOs\ReturnOrderDTO;
 use app\models\Order;
 use DomainException;
 use yii\db\Exception;
@@ -47,6 +48,26 @@ class OrderRepository
         }
         $transaction = $accountingRepository->createTransactionForOrder($acceptOrderDTO);
         $order->customer_id = $acceptOrderDTO->getCustomerID();
+        $order->payment_type = $transaction->payment_type;
+        $order->status = Order::STATUS_ACTIVE;
+        if (!$order->save()){
+            throw new DomainException("Buyurtmani tasdiqlashda xatolik bor!");
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function orderReturn(Order $order, ReturnOrderDTO $returnOrderDto): void
+    {
+        $storageRepository = new StorageRepository();
+        $accountingRepository = new AccountingRepository();
+        $order->loadRelations('orderGoods.product');
+        foreach ($order->orderGoods as $orderGood) {
+            $storageRepository->createReturnRecord($orderGood);
+        }
+        $transaction = $accountingRepository->createTransactionForReturn($returnOrderDto);
+        $order->customer_id = $returnOrderDto->customer_id;
         $order->payment_type = $transaction->payment_type;
         $order->status = Order::STATUS_ACTIVE;
         if (!$order->save()){

@@ -30,6 +30,9 @@ class ProductHistory extends \app\models\BaseModel
 
     const TYPE_INCOME = 1;
     const TYPE_OUTCOME = 2;
+
+    const TYPE_RETURN = 3;
+
     const STATUS_ACTIVE = 1;
     const STATUS_WAIT = 2;
 

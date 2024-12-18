@@ -4,6 +4,7 @@ namespace app\repositories;
 
 use app\DTOs\AcceptOrderDTO;
 use app\DTOs\GetTransactionDTO;
+use app\DTOs\ReturnOrderDTO;
 use app\DTOs\TransactionDTO;
 use app\models\Order;
 use app\models\ProductList;
@@ -161,6 +162,9 @@ class AccountingRepository
             return $this->createMultiTransactions($transactionDto, $acceptOrderDTO);
         } else {
             $transactionDto->payment_type = $acceptOrderDTO->getPaymentType();
+            if ($transactionDto->payment_type === Transaction::PAYMENT_TYPE_DEBT) {
+                $transactionDto->customer_id = $acceptOrderDTO->getCustomerID();
+            }
             return $this->updateOrCreateTransaction($transactionDto, true);
         }
     }
@@ -189,5 +193,23 @@ class AccountingRepository
             $this->updateOrCreateTransaction($transactionDto, true);
         }
         return $transaction;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function createTransactionForReturn(ReturnOrderDTO $returnOrderDto)
+    {
+        $transactionDto = new TransactionDTO();
+        $transactionDto->amount = $returnOrderDto->getTotalSum();
+        $transactionDto->type = Transaction::TYPE_OUTCOME;
+        $transactionDto->date = $returnOrderDto->order->accepted_at;
+        $transactionDto->transaction_date = time();
+        $transactionDto->model_class = Order::class;
+        $transactionDto->model_id = $returnOrderDto->order->id;
+        $transactionDto->is_cash = 1;
+        $transactionDto->payment_type = Transaction::PAYMENT_TYPE_CASH;
+        $transactionDto->customer_id = $returnOrderDto->customer_id;
+        return $this->updateOrCreateTransaction($transactionDto, true);
     }
 }

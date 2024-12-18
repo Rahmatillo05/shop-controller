@@ -15,6 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property int $id
  * @property int $user_id
  * @property int $status
+ * @property int $type
  * @property string $payment_type
  * @property int|null $customer_id
  * @property int|null $accepted_at
@@ -34,6 +35,8 @@ class Order extends BaseModel
 {
     const STATUS_INACTIVE = 2;
     const STATUS_ACTIVE = 1;
+    const TYPE_SOLD = 1;
+    const TYPE_RETURNED = 2;
 
     /**
      * {@inheritdoc}
@@ -64,7 +67,7 @@ class Order extends BaseModel
             [['payment_type'], 'required'],
             [['status'], 'default', 'value' => self::STATUS_INACTIVE],
             [['user_id', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['user_id', 'status', 'payment_type', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'status', 'payment_type', 'customer_id', 'accepted_at', 'deleted_at', 'created_at', 'updated_at', 'type'], 'integer'],
             [['comment'], 'string'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'id']],

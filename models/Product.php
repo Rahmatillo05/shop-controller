@@ -120,7 +120,7 @@ class Product extends \app\models\BaseModel
     public function getRemind(): float
     {
         $income = $this->getProductHistory()
-            ->andWhere(['type' => ProductHistory::TYPE_INCOME])->sum('amount');
+            ->andWhere(['type' => [ProductHistory::TYPE_INCOME, ProductHistory::TYPE_RETURN]])->sum('amount');
         $outgoing = $this->getProductHistory()
             ->andWhere(['type' => ProductHistory::TYPE_OUTCOME])->sum('amount');
         return round($income - $outgoing, 2);
