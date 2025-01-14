@@ -8,8 +8,8 @@ services:
     ports:
       - "80:9000"
     environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
+      - YII_DEBUG=production
+      - YII_ENV=false
       - DB_HOST=${DB_HOST}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
