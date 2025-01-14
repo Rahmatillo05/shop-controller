@@ -1,4 +1,4 @@
-# Use an official PHP image with Composer and extensions for Yii
+# Use an official PHP image
 FROM php:8.1-fpm
 
 # Install system dependencies
@@ -12,18 +12,19 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     curl \
+    libpq-dev \
     && docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
+        --with-freetype \
+        --with-jpeg \
     && docker-php-ext-install \
-    gd \
-    mbstring \
-    pdo \
-    pdo_mysql \
-    pdo_pgsql \
-    pgsql \
-    zip \
-    opcache
+        gd \
+        mbstring \
+        pdo \
+        pdo_mysql \
+        pdo_pgsql \
+        pgsql \
+        zip \
+        opcache
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
