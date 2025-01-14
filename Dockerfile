@@ -39,8 +39,8 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/runtime /var/www/html/web/assets
 
-# Expose port 80
-EXPOSE 80
+# Expose port 9000
+EXPOSE 9000
 
 # Start PHP-FPM server
-CMD ["php-fpm"]
+CMD ["php", "-S", "0.0.0.0:9000", "-t", "web"]

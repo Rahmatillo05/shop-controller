@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "80:9000"
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
