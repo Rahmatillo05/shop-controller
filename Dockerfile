@@ -41,6 +41,6 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Expose port 9000
 EXPOSE 9000
-
+RUN cp .env.example .env
 # Start PHP-FPM server
 CMD ["php", "-S", "0.0.0.0:9000", "-t", "web"]
