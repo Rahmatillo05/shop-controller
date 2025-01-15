@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    extra_hosts:
+      - "postgres.railway.internal:host-gateway"
     ports:
       - "80:9000"
     environment:
