@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -10,8 +8,8 @@ services:
     ports:
       - "80:9000"
     environment:
-      - YII_DEBUG=production
-      - YII_ENV=false
+      - YII_DEBUG=false
+      - YII_ENV=prod
       - DB_HOST=${DB_HOST}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
